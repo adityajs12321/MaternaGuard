@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: maternaguard-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: maternaguard-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 1440
+      - key: MODEL_PATH
+        value: ml_new/models/model_rf_v1.pkl
+      - key: SCALER_PATH
+        value: ml_new/models/scaler.pkl
+      - key: ALLOWED_ORIGINS
+        value: https://your-frontend-domain.vercel.app
+
+  - type: pserv
+    name: maternaguard-db
+    plan: free
+    env: postgresql

@@ -1,0 +1,77 @@
+{
+  "name": "Alert",
+  "type": "object",
+  "properties": {
+    "patient_email": {
+      "type": "string"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "high_blood_pressure",
+        "low_oxygen",
+        "high_glucose",
+        "severe_symptoms",
+        "critical_vitals",
+        "missed_checkup"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "warning",
+        "danger",
+        "critical"
+      ],
+      "default": "warning"
+    },
+    "message": {
+      "type": "string"
+    },
+    "is_resolved": {
+      "type": "boolean",
+      "default": false
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "health_log_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "patient_email",
+    "alert_type",
+    "message"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.patient_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

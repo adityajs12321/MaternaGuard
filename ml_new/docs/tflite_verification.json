@@ -1,0 +1,22 @@
+{
+  "model_path": "models/model.tflite",
+  "model_size_kb": 10.41,
+  "input_shape": [
+    1,
+    11
+  ],
+  "output_shape": [
+    1,
+    3
+  ],
+  "ann_prediction": 2,
+  "tflite_prediction": 2,
+  "predictions_match": true,
+  "tflite_probabilities": [
+    [
+      0.08768843859434128,
+      0.385879248380661,
+      0.5264322757720947
+    ]
+  ]
+}

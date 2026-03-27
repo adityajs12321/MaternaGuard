@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ProArt palette:
+       #547174 – dark teal (primary)
+       #00001A – near-black (foreground/dark)
+       #D7E3C8 – sage green (light accent/bg)
+       #3B6E7C – steel blue (secondary)
+       #4ACBC5 – bright cyan (highlight)
+    */
+
+    --background: 167 85% 89%;        /* very light sage tint */
+    --foreground: 240 100% 10%;      /* #00001A near-black */
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 100% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 100% 10%;
+
+    --primary: 175 77% 26%;          /* #547174 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 92 83% 88%;         /* #D7E3C8 sage */
+    --secondary-foreground: 184 14% 18%;
+
+    --muted: 92 20% 92%;
+    --muted-foreground: 184 80% 21%;
+
+    --accent: 175 84% 32%;           /* #3B6E7C steel blue */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 92 15% 82%;
+    --input: 92 15% 82%;
+    --ring: 178 53% 54%;             /* #4ACBC5 cyan */
+
+    --radius: 0.75rem;
+
+    --chart-1: 184 17% 38%;
+    --chart-2: 191 34% 36%;
+    --chart-3: 178 53% 54%;
+    --chart-4: 92 26% 70%;
+    --chart-5: 240 100% 10%;
+
+    --highlight: 178 53% 54%;        /* #4ACBC5 */
+
+    --font-inter: 'Inter', sans-serif;
+    --font-playfair: 'Playfair Display', serif;
+  }
+
+  .dark {
+    --background: 240 100% 6%;
+    --foreground: 92 26% 88%;
+    --card: 240 80% 10%;
+    --card-foreground: 92 26% 88%;
+    --popover: 240 80% 10%;
+    --popover-foreground: 92 26% 88%;
+    --primary: 178 53% 54%;
+    --primary-foreground: 240 100% 10%;
+    --secondary: 191 34% 22%;
+    --secondary-foreground: 92 26% 85%;
+    --muted: 191 20% 18%;
+    --muted-foreground: 92 15% 60%;
+    --accent: 178 53% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 191 20% 22%;
+    --input: 191 20% 22%;
+    --ring: 178 53% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+}
