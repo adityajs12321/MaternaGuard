@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List
 
 import os
 import joblib
@@ -65,10 +66,12 @@ class Predictor:
         gbt_path = models_dir / "model_gbt.pkl"
         ann_path = models_dir / "model_ann.keras"
 
-        if not (rf_path.exists() and svm_path.exists() and xgb_path.exists() and gbt_path.exists() and ann_path.exists() and scaler_path.exists()):
+        # Require core artifacts and treat GBT as optional to avoid hard startup failures
+        # from environment-specific pickle incompatibilities.
+        if not (rf_path.exists() and svm_path.exists() and xgb_path.exists() and ann_path.exists() and scaler_path.exists()):
             self.status = PredictorStatus(
                 model_loaded=False,
-                details=f"Missing ensemble artifacts in {models_dir}",
+                details=f"Missing core ensemble artifacts in {models_dir}",
             )
             return
 
@@ -78,15 +81,29 @@ class Predictor:
         self.rf_model = joblib.load(rf_path)
         self.svm_model = joblib.load(svm_path)
         self.xgb_model = joblib.load(xgb_path)
-        self.gbt_model = joblib.load(gbt_path)
+        self.gbt_model = None
+        gbt_loaded = False
+        if gbt_path.exists():
+            try:
+                self.gbt_model = joblib.load(gbt_path)
+                gbt_loaded = True
+            except Exception:
+                self.gbt_model = None
         
         # Load ANN and construct feature extractor
         self.ann_model = keras.models.load_model(ann_path)
         self.extractor = keras.Model(inputs=self.ann_model.inputs, outputs=self.ann_model.layers[-2].output)
 
         # Explainer will use XGB for feature importance generation to keep it fast & standard 11-feature space
-        self.explainer = shap.TreeExplainer(self.xgb_model)
-        self.status = PredictorStatus(model_loaded=True, details="Loaded full voting Ensemble (RF, SVM, ANN, XGB, GBT)")
+        try:
+            self.explainer = shap.TreeExplainer(self.xgb_model)
+        except Exception:
+            self.explainer = None
+        details = "Loaded voting Ensemble (RF, SVM, ANN, XGB"
+        details += ", GBT)" if gbt_loaded else ") - GBT skipped due to artifact compatibility"
+        if self.explainer is None:
+            details += " - SHAP fallback enabled"
+        self.status = PredictorStatus(model_loaded=True, details=details)
 
     def engineer_features(self, vitals: dict) -> np.ndarray:
         age = vitals["age"]
@@ -127,7 +144,6 @@ class Predictor:
         
         # 1. Base inputs for XGB, GBT, and ANN
         xgb_proba = self.xgb_model.predict_proba(x_scaled)[0]
-        gbt_proba = self.gbt_model.predict_proba(x_scaled)[0]
         ann_proba = self.ann_model.predict(x_scaled, verbose=0)[0]
         
         # 2. Extract latent features from ANN for Feature Fused models (RF, SVM)
@@ -138,19 +154,25 @@ class Predictor:
         svm_proba = self.svm_model.predict_proba(x_fused)[0]
         
         # 3. Ensemble Average (Soft Voting) since meta_svm was not saved by Member A's pipeline
-        ensemble_proba = (xgb_proba + gbt_proba + ann_proba + rf_proba + svm_proba) / 5.0
+        probas: List[np.ndarray] = [xgb_proba, ann_proba, rf_proba, svm_proba]
+        if self.gbt_model is not None:
+            probas.append(self.gbt_model.predict_proba(x_scaled)[0])
+        ensemble_proba = np.mean(np.vstack(probas), axis=0)
 
         pred_idx = int(np.argmax(ensemble_proba))
         risk_level = LABEL_MAP[pred_idx]
         confidence = float(np.max(ensemble_proba))
 
         # 4. SHAP uses XGB for the clean 11-feature interpretability
-        shap_values = self.explainer.shap_values(x_scaled)
-        selected_shap = shap_values[pred_idx][0] if isinstance(shap_values, list) else shap_values[0, :, pred_idx]
-        
-        top_idx = int(np.argmax(np.abs(selected_shap)))
-        top_feature = FEATURE_NAMES[top_idx]
-        shap_dict = {name: float(val) for name, val in zip(FEATURE_NAMES, selected_shap)}
+        if self.explainer is not None:
+            shap_values = self.explainer.shap_values(x_scaled)
+            selected_shap = shap_values[pred_idx][0] if isinstance(shap_values, list) else shap_values[0, :, pred_idx]
+            top_idx = int(np.argmax(np.abs(selected_shap)))
+            top_feature = FEATURE_NAMES[top_idx]
+            shap_dict = {name: float(val) for name, val in zip(FEATURE_NAMES, selected_shap)}
+        else:
+            top_feature = FEATURE_NAMES[0]
+            shap_dict = {name: 0.0 for name in FEATURE_NAMES}
 
         return {
             "risk_level": risk_level,
