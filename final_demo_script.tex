@@ -1,0 +1,43 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\setstretch{1.15}
+
+\title{MaternaGuard Final Demo Script (2 Minutes)}
+\author{Team Kundanzz}
+\date{}
+
+\begin{document}
+\maketitle
+
+Hello everyone, we are Team Kundanzz.
+Before we begin, MaternaGuard is now live and deployed: frontend on Vercel and backend on Render.
+
+I am Anirudh, working on the app and user workflow.
+Aditya leads the ML pipeline and model optimization.
+Donil handles backend APIs, database integration, and deployment.
+
+MaternaGuard is built to reduce preventable maternal risk escalation delays in rural India.
+The user enters six basic vitals available at PHC level: age, systolic BP, diastolic BP, blood sugar, body temperature, and heart rate.
+
+Now I will show the demo flow.
+On the Log Health page, we enter these six values for a patient.
+When we submit, the app calls our FastAPI predict endpoint.
+The backend runs our integrated ensemble inference pipeline and returns one of three classes: Low Risk, Mid Risk, or High Risk.
+It also returns confidence and the top contributing factor for explainability.
+
+On the dashboard, we can see recent assessments and risk trends.
+In alerts, high-risk entries are clearly highlighted so frontline workers can prioritize escalation.
+On the provider side, doctors can view patient-level assessment history to support faster triage decisions.
+
+From the engineering side, we implemented modular backend routes for health, predict, sync, patients, and auth, with persistent storage and deployment-ready configuration.
+Our ML stack combines multiple trained models and feature fusion to improve robustness on real-world variability.
+
+MaternaGuard is designed for low-resource environments, with practical workflows for constrained connectivity.
+Our next milestones are broader validation and stronger production deployment.
+
+Thank you.
+
+\end{document}

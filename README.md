@@ -3,6 +3,19 @@
 MaternaGuard is a maternal health risk triage platform for low-resource settings.
 It combines a trained ML risk model, a FastAPI backend, and a React web app to help identify high-risk pregnancy cases early and support faster escalation.
 
+## Live Deployment
+
+1. Frontend (Vercel): https://maternaguard.vercel.app
+2. Frontend preview domain: https://maternaguard-hwpqljnhp-doniljaison16-1600s-projects.vercel.app
+3. Backend (Render): https://maternaguard-backend.onrender.com
+4. Backend health check: https://maternaguard-backend.onrender.com/health
+
+How to open the deployed app:
+1. Open https://maternaguard.vercel.app in a browser.
+2. Go to Log and submit vitals.
+3. The frontend calls the Render backend for prediction.
+4. View risk result, dashboard updates, and alerts.
+
 ## IMPACT AND BENEFITS
 
 **70,000+**  
@@ -135,6 +148,8 @@ Frontend:
 2. Database: Render Postgres for hosted environment.
 3. Frontend deployment: Vercel/Netlify (set API base URL to backend domain).
 4. ML artifacts are loaded from `ml_new/models` at runtime.
+5. Current production frontend domain: https://maternaguard.vercel.app
+6. Set backend `ALLOWED_ORIGINS` to include Vercel domains.
 
 ## What Is Done Vs Pending
 
