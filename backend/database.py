@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from .config import get_database_url
+from config import get_database_url
 
 
 DATABASE_URL = get_database_url()

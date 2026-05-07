@@ -8,9 +8,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from .database import Base, SessionLocal, engine
-from .routes import assessments, auth, patients, predict, sync
-from .services.predictor import predictor
+from database import Base, SessionLocal, engine
+from routes import assessments, auth, patients, predict, sync
+from services.predictor import predictor
 
 
 app = FastAPI(title="MaternaGuard Backend", version="1.0.0")

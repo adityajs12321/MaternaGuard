@@ -6,9 +6,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_db, require_doctor
-from ..models import Assessment
-from ..schemas import AssessmentHistoryItem
+from dependencies import get_db, require_doctor
+from models import Assessment
+from schemas import AssessmentHistoryItem
 
 
 router = APIRouter(prefix="/assessments", tags=["assessments"])

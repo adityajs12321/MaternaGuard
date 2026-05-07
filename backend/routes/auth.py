@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
 
-from ..schemas import LoginRequest, TokenResponse
-from ..security import create_access_token, validate_doctor_credentials
+from schemas import LoginRequest, TokenResponse
+from security import create_access_token, validate_doctor_credentials
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])

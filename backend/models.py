@@ -8,7 +8,7 @@ import uuid
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from .database import Base
+from database import Base
 
 
 class Patient(Base):

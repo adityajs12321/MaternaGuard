@@ -8,7 +8,7 @@ import os
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from .config import get_access_token_expiry_minutes, get_algorithm, get_secret_key
+from config import get_access_token_expiry_minutes, get_algorithm, get_secret_key
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

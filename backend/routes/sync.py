@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_db
-from ..models import Assessment, Patient
-from ..schemas import SyncRequest, SyncResponse
-from ..services.predictor import predictor
-from ..services.sms import send_referral_sms
+from dependencies import get_db
+from models import Assessment, Patient
+from schemas import SyncRequest, SyncResponse
+from services.predictor import predictor
+from services.sms import send_referral_sms
 
 
 router = APIRouter(tags=["sync"])

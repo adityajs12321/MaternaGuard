@@ -19,12 +19,10 @@ services:
         value: 1440
       - key: PYTHON_VERSION
         value: 3.11.9
-      - key: MODEL_PATH
-        value: ml_new/models/model_rf_v1.pkl
-      - key: SCALER_PATH
-        value: ml_new/models/scaler.pkl
+      - key: LAMBDA_PREDICT_URL
+        sync: false
       - key: ALLOWED_ORIGINS
-        value: https://your-frontend-domain.vercel.app
+        value: https://maternaguard.vercel.app
 
 databases:
   - name: maternaguard-db

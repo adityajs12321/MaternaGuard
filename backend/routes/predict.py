@@ -5,12 +5,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from ..dependencies import get_db
-from ..models import Assessment, Patient
-from ..schemas import AssessmentInput, AssessmentResult
-from ..services.predictor import predictor
-from ..services.shap_service import explain_action_message
-from ..services.sms import send_referral_sms
+from dependencies import get_db
+from models import Assessment, Patient
+from schemas import AssessmentInput, AssessmentResult
+from services.predictor import predictor
+from services.shap_service import explain_action_message
+from services.sms import send_referral_sms
 
 
 router = APIRouter(tags=["predict"])
