@@ -73,10 +73,17 @@ class Predictor:
     def _load_artifacts(self) -> None:
         # Suppress TF logging
         os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-        import joblib
-        import shap
-        import tensorflow as tf
-        from tensorflow import keras
+        try:
+            import joblib
+            import shap
+            import tensorflow as tf
+            from tensorflow import keras
+        except ImportError as e:
+            self.status = PredictorStatus(
+                model_loaded=False,
+                details=f"Missing ML dependencies: {e}. Please set LAMBDA_PREDICT_URL or install ML packages locally.",
+            )
+            return
 
         models_dir: Path = get_model_path().parent
         scaler_path: Path = get_scaler_path()
