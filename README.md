@@ -5,13 +5,8 @@ It combines a trained ML risk model, a FastAPI backend, and a React web app to h
 
 ## Live Deployment
 
-1. Frontend (Vercel): https://maternaguard.vercel.app
-2. Frontend preview domain: https://maternaguard-hwpqljnhp-doniljaison16-1600s-projects.vercel.app
-3. Backend (Render): https://maternaguard-backend.onrender.com
-4. Backend health check: https://maternaguard-backend.onrender.com/health
-
-How to open the deployed app:
-1. Open https://maternaguard.vercel.app in a browser.
+To open the deployed app:
+1. Open https://materna-guard.vercel.app in a browser.
 2. Go to Log and submit vitals.
 3. The frontend calls the Render backend for prediction.
 4. View risk result, dashboard updates, and alerts.
@@ -114,42 +109,38 @@ Based on the merging of unifying DS1, DS2, and DS3 with ADASYN and our Stacking 
 
 *Dataset composition metrics and evaluation data are preserved in `ml_new/docs/`.*
 
-## Tech Stack
+## Tech Stack & Architecture
 
-1. **Frontend:** React + Vite
-2. **Backend:** FastAPI + SQLAlchemy + JWT auth
-3. **Database:** SQLite (local), PostgreSQL (Render deployment)
-4. **ML:** Scikit-Learn, TensorFlow, and XGBoost artifacts in `ml_new/models`
-5. **Explainability:** SHAP support in backend services
+MaternaGuard uses a highly scalable, free-tier optimized **Three-Tier Serverless Architecture**:
 
-Supporting root files:
-1. `requirements.txt`
-2. `.env.example`
-3. `render.yaml`
-4. `docker-compose.yml`
-5. `Dockerfile`
+1. **Frontend (Vercel):** React + Vite. Features a robust Offline-First PWA design that gracefully handles network drops and backend cold-starts by queuing assessments locally and auto-syncing when connectivity is restored.
+2. **Backend (Render):** FastAPI + SQLAlchemy + PostgreSQL. Handles authentication, patient data, offline-sync conflict resolution, and Twilio SMS routing. Configured automatically via `render.yaml`.
+3. **ML Inference (AWS Lambda):** Containerized Python 3.12 (arm64) running Scikit-Learn, TensorFlow, and XGBoost, all hosted on serverless infrastructure. Separating ML from the backend reduces memory costs and allows the ML models to scale independently.
 
-## Local Run (Quick)
+Supporting root deployment files:
+1. `render.yaml` - Automated Render blueprint for PostgreSQL & FastAPI
+2. `lambda_ml/Dockerfile` - AWS Lambda inference container configuration
+3. `deploy_lambda.sh` - Automated script to build and push the arm64 Lambda image
+4. `create_api_gateway.sh` - Automated script to expose Lambda securely via AWS API Gateway
+
+## Local Setup
 
 Backend:
 1. Create and activate a Python virtual environment.
 2. Install dependencies from `requirements.txt`.
-3. Copy `.env.example` to `.env` and update variables.
+3. Copy `.env.example` to `.env` and update variables (leave `LAMBDA_PREDICT_URL` empty to run ML locally).
 4. Start API with `uvicorn backend.app:app --reload`.
 
 Frontend:
 1. Open `app/`.
 2. Install Node packages.
-3. Start with `npm run dev`.
+3. Start with `npm start`.
 
-## Deployment Notes
+## Deployment
 
-1. Backend deployment target: Render using `render.yaml`.
-2. Database: Render Postgres for hosted environment.
-3. Frontend deployment: Vercel/Netlify (set API base URL to backend domain).
-4. ML artifacts are loaded from `ml_new/models` at runtime.
-5. Current production frontend domain: https://maternaguard.vercel.app
-6. Set backend `ALLOWED_ORIGINS` to include Vercel domains.
+1. **Frontend:** Vercel. Set `VITE_API_BASE_URL` to your Render backend domain.
+2. **Backend:** Render. Connect your GitHub repository using the "Blueprint" option to automatically deploy the Postgres Database and FastAPI service based on `render.yaml`.
+3. **ML Inference:** AWS Lambda. Run `./deploy_lambda.sh` to push the container, then `./create_api_gateway.sh` to generate the public endpoint. Add this endpoint to the Render dashboard as `LAMBDA_PREDICT_URL`.
 
 ## What Is Done Vs Pending
 
@@ -164,4 +155,3 @@ Pending for real-world deployment:
 2. Government and hospital process integration.
 3. Operational referral workflow approvals.
 4. Production identity and access management.
-5. Hardened offline-first and network-failure handling for field rollout.
