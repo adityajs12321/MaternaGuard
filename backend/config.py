@@ -11,7 +11,10 @@ def repo_root() -> Path:
 
 
 def get_database_url() -> str:
-    return os.getenv("DATABASE_URL", "sqlite:///./maternaguard.db")
+    url = os.getenv("DATABASE_URL", "sqlite:///./maternaguard.db")
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    return url
 
 
 def get_secret_key() -> str:
