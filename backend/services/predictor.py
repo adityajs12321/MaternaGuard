@@ -36,8 +36,8 @@ FEATURE_NAMES = [
 
 LABEL_MAP = {0: "low", 1: "mid", 2: "high"}
 
-# If set, all predictions are forwarded to this Lambda function URL.
-LAMBDA_PREDICT_URL = os.getenv("LAMBDA_PREDICT_URL", "")
+# If set, all predictions are forwarded to this Lambda function directly via boto3.
+USE_AWS_LAMBDA = bool(os.getenv("LAMBDA_PREDICT_URL")) or bool(os.getenv("AWS_ACCESS_KEY_ID"))
 
 
 @dataclass
@@ -56,11 +56,11 @@ class Predictor:
         self.extractor = None
         self.scaler = None
         self.explainer = None
-        self._use_lambda = bool(LAMBDA_PREDICT_URL)
+        self._use_lambda = USE_AWS_LAMBDA
         if self._use_lambda:
             self.status = PredictorStatus(
                 model_loaded=True,
-                details=f"Remote Lambda inference via {LAMBDA_PREDICT_URL}",
+                details="Remote Lambda inference via AWS boto3 (IAM Secured)",
             )
         else:
             self.status = PredictorStatus(model_loaded=False, details="Model not loaded")
@@ -173,7 +173,10 @@ class Predictor:
     # ------------------------------------------------------------------
 
     def _predict_remote(self, vitals: dict) -> dict:
-        """Call the AWS Lambda function URL for prediction."""
+        """Call the AWS Lambda function directly using boto3 with IAM Signature v4."""
+        import boto3
+        import botocore.exceptions
+
         payload = json.dumps({
             "age": vitals["age"],
             "sbp": vitals["sbp"],
@@ -183,23 +186,26 @@ class Predictor:
             "heart_rate": vitals["heart_rate"],
         }).encode("utf-8")
 
-        req = urllib.request.Request(
-            LAMBDA_PREDICT_URL,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
+        # Automatically picks up AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION
+        client = boto3.client("lambda", region_name=os.getenv("AWS_REGION", "ap-south-2"))
+        function_name = os.getenv("LAMBDA_FUNCTION_NAME", "maternaguard-predict")
 
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-                # Lambda may wrap in a body field (API Gateway proxy response)
-                if "body" in body and isinstance(body["body"], str):
-                    return json.loads(body["body"])
-                return body
-        except urllib.error.HTTPError as exc:
-            error_body = exc.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"Lambda prediction failed ({exc.code}): {error_body}") from exc
+            response = client.invoke(
+                FunctionName=function_name,
+                InvocationType="RequestResponse",
+                Payload=payload
+            )
+            response_payload = response["Payload"].read().decode("utf-8")
+            body = json.loads(response_payload)
+            
+            # API Gateway format compatibility if Lambda returnsstatusCode
+            if "body" in body and isinstance(body["body"], str):
+                return json.loads(body["body"])
+            return body
+
+        except botocore.exceptions.ClientError as exc:
+            raise RuntimeError(f"IAM Signed Lambda prediction failed: {exc}") from exc
         except Exception as exc:
             raise RuntimeError(f"Lambda prediction error: {exc}") from exc
 
